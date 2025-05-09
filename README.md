@@ -10,8 +10,8 @@ A Go script to track merged pull requests in a GitHub repository and open PRs in
 ## Installation
 
 1. Make sure you have the GitHub CLI installed:
-   For installation instructiosn see https://github.com/cli/cli#installation
-   
+
+For installation instructiosn see https://github.com/cli/cli#installation 
 
 2. Authenticate with GitHub:
    ```bash
