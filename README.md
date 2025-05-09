@@ -10,12 +10,8 @@ A Go script to track merged pull requests in a GitHub repository and open PRs in
 ## Installation
 
 1. Make sure you have the GitHub CLI installed:
-   ```bash
-   # macOS
-   brew install gh
+   For installation instructiosn see https://github.com/cli/cli#installation
    
-   # Other platforms: https://github.com/cli/cli#installation
-   ```
 
 2. Authenticate with GitHub:
    ```bash
@@ -40,10 +36,10 @@ Fetches PRs from GitHub and saves them to a CSV file.
 
 Example:
 ```bash
-./github-pr-tracker -mode list -since 2023-05-01 -repo launchdarkly/terraform -search "federal"
+./github-pr-tracker -mode list -since 2023-05-01 -repo yfnstn/github-pr-tracker -search "initial"
 ```
 
-This will create a CSV file named `merged_prs_launchdarkly_terraform_20230501_federal.csv` containing:
+This will create a CSV file named `merged_prs_yfnstn_github-pr-tracker_20230501_initial.csv` containing:
 - PR Number
 - Title
 - Merged At
@@ -58,7 +54,7 @@ Opens PR URLs from a CSV file in your default browser.
 
 Example:
 ```bash
-./github-pr-tracker -mode open -urls merged_prs_launchdarkly_terraform_20230501_federal.csv
+./github-pr-tracker -mode open -urls merged_prs_yfnstn_github-pr-tracker_20230501_initial.csv
 ```
 
 ## Features
