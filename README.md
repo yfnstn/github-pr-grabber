@@ -1,11 +1,16 @@
 # GitHub PR Tracker
 
-A Go script to track merged pull requests in a GitHub repository and open PRs in your browser.
+A Go script to support audit evidence collection, the script can: 
+- Track merged pull requests in a GitHub repository 
+- Open a provided list of PRs in your browser 
+- Generate PDFs/screenshots of PR pages from a provided list of urls
 
 ## Prerequisites
 
 - Go 1.x
-- GitHub CLI (`gh`) installed and authenticated
+- GitHub CLI (`gh`) installed and authenticated (for working with private repos)
+- Playwright (for PDF/screenshot generation)
+- Node.js (for installing Playwright)
 
 ## Installation
 
@@ -22,14 +27,34 @@ A Go script to track merged pull requests in a GitHub repository and open PRs in
    gh auth login
    ```
 
-3. Build the Go script:
+3. Install Playwright and its dependencies:
+   ```bash
+   # Install Node.js if you haven't already
+   brew install node
+
+   # Install Playwright
+   npm install -g playwright
+   playwright install chromium
+   ```
+
+4. Build the Go script:
    ```bash
    go build
    ```
 
+5. (Optional) Create a `.env` file for GitHub authentication:
+   ```bash
+   # Create .env file
+   echo "GITHUB_TOKEN=your_github_token_here" > .env
+   ```
+   To get a GitHub token:
+   - Go to GitHub.com → Settings → Developer Settings → Personal Access Tokens → Tokens
+   - Generate a new token with the `repo` scope (for private repos)
+   - Copy the token and paste it in your `.env` file
+
 ## Usage
 
-The script has two modes of operation:
+The script has three modes of operation:
 
 ### 1. List Mode
 Fetches PRs from GitHub and saves them to a CSV file.
@@ -40,10 +65,10 @@ Fetches PRs from GitHub and saves them to a CSV file.
 
 Example:
 ```bash
-./github-pr-tracker -mode list -since 2023-05-01 -repo launchdarkly/terraform -search "federal"
+./github-pr-tracker -mode list -since 2023-05-01 -repo yfnstn/github-pr-tracker -search "term"
 ```
 
-This will create a CSV file named `merged_prs_launchdarkly_terraform_20230501_federal.csv` containing:
+This will create a CSV file named `merged_prs_yfnstn_github-pr-tracker_20230501_term.csv` containing:
 - PR Number
 - Title
 - Merged At
@@ -58,22 +83,50 @@ Opens PR URLs from a CSV file in your default browser.
 
 Example:
 ```bash
-./github-pr-tracker -mode open -urls merged_prs_launchdarkly_terraform_20230501_federal.csv
+./github-pr-tracker -mode open -urls merged_prs_yfnstn_github-pr-tracker_20230501_term.csv
 ```
+
+### 3. Capture Mode
+Generates PDFs or screenshots of PR pages from URLs in a CSV file.
+
+```bash
+./github-pr-tracker -mode capture -urls <csv_file> [-format pdf|png] [-output dir] [-wait seconds] [-fullpage]
+```
+
+Options:
+- `-format`: Output format, either "pdf" (default) or "png"
+- `-output`: Output directory (default: "pr_captures")
+- `-wait`: Seconds to wait for page load (default: 5)
+- `-fullpage`: Whether to capture the full page (default: true)
+
+Example:
+```bash
+# Generate PDFs
+./github-pr-tracker -mode capture -urls merged_prs.csv -output ./pr_captures -wait 10
+
+# Generate screenshots
+./github-pr-tracker -mode capture -urls merged_prs.csv -format png -output ./pr_captures
+```
+
+For private repositories, make sure you have set up your GitHub token in the `.env` file as described in the installation section.
 
 ## Features
 
-- Fetch up to 1000 PRs in a single query
+- Fetch up to 10000 PRs in a single query
 - Filter PRs by date and search term
 - Save PR details to CSV
 - Open PRs in your default browser
+- Generate PDFs or screenshots of PR pages
+- Support for private repositories via GitHub token
 - Support for GitHub CLI authentication
 - Can be run from any directory
 
 ## Notes
 
 - The script requires GitHub CLI authentication to access the repository
+- For private repositories, a GitHub Personal Access Token is required (set in `.env`)
 - The search term is optional and will filter PRs by matching the term in their titles or descriptions
 - You can run the script from any directory - it no longer needs to be run from within the target repository
-- The script will fetch all matching PRs, not just the first 30 results
-- Results are fetched in batches of 10000 to ensure complete data collection 
+- Generated files are named in the format `repo_pr_#.pdf` or `repo_pr_#.png`
+- The script will create the output directory if it doesn't exist
+- For best results with PDF generation, use a wait time of at least 5-10 seconds 
