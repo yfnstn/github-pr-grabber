@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/playwright-community/playwright-go"
 )
 
@@ -100,8 +101,9 @@ func saveToCSV(prs []PR, outputFile string) error {
 type CaptureOptions struct {
 	Format    string // "pdf" or "png"
 	OutputDir string
-	WaitTime  int  // seconds to wait for page load
-	FullPage  bool // whether to capture full page
+	WaitTime  int    // seconds to wait for page load
+	FullPage  bool   // whether to capture full page
+	AuthToken string // GitHub Personal Access Token
 }
 
 func capturePRPage(url string, options CaptureOptions) error {
@@ -117,11 +119,26 @@ func capturePRPage(url string, options CaptureOptions) error {
 	}
 	defer browser.Close()
 
+	// Create a new context
 	context, err := browser.NewContext()
 	if err != nil {
 		return fmt.Errorf("could not create context: %v", err)
 	}
 	defer context.Close()
+
+	// If auth token is provided, set it in the Authorization header
+	if options.AuthToken != "" {
+		// Set up request interception to add the auth header
+		if err := context.Route("**/*", func(route playwright.Route) {
+			headers := route.Request().Headers()
+			headers["Authorization"] = fmt.Sprintf("Bearer %s", options.AuthToken)
+			route.Continue(playwright.RouteContinueOptions{
+				Headers: headers,
+			})
+		}); err != nil {
+			return fmt.Errorf("could not set up request interception: %v", err)
+		}
+	}
 
 	page, err := context.NewPage()
 	if err != nil {
@@ -136,10 +153,15 @@ func capturePRPage(url string, options CaptureOptions) error {
 	// Wait for the page to be fully loaded
 	time.Sleep(time.Duration(options.WaitTime) * time.Second)
 
-	// Extract PR number from URL for filename
+	// Extract PR number and repo name from URL for filename
+	// URL format: https://github.com/owner/repo/pull/123
 	parts := strings.Split(url, "/")
-	prNumber := parts[len(parts)-1]
-	filename := fmt.Sprintf("pr_%s", prNumber)
+	if len(parts) < 7 {
+		return fmt.Errorf("invalid PR URL format: %s", url)
+	}
+	repo := parts[4]
+	prNumber := parts[6]
+	filename := fmt.Sprintf("%s_pr_%s", repo, prNumber)
 
 	// Create output directory if it doesn't exist
 	if err := os.MkdirAll(options.OutputDir, 0755); err != nil {
@@ -149,6 +171,7 @@ func capturePRPage(url string, options CaptureOptions) error {
 	// Generate the output file path
 	outputPath := filepath.Join(options.OutputDir, filename)
 	if options.Format == "pdf" {
+		outputPath += ".pdf"
 		_, err := page.PDF(playwright.PagePdfOptions{
 			Path:            playwright.String(outputPath),
 			Format:          playwright.String("Letter"),
@@ -158,6 +181,7 @@ func capturePRPage(url string, options CaptureOptions) error {
 			return fmt.Errorf("could not save PDF: %v", err)
 		}
 	} else {
+		outputPath += ".png"
 		_, err := page.Screenshot(playwright.PageScreenshotOptions{
 			Path:     playwright.String(outputPath),
 			FullPage: playwright.Bool(options.FullPage),
@@ -171,6 +195,14 @@ func capturePRPage(url string, options CaptureOptions) error {
 }
 
 func main() {
+	// Load .env file if it exists
+	if err := godotenv.Load(); err != nil {
+		// Only log if the error is not "file not found"
+		if !strings.Contains(err.Error(), "no such file") {
+			log.Printf("Warning: Error loading .env file: %v", err)
+		}
+	}
+
 	// Define mode flag
 	mode := flag.String("mode", "", "Operation mode: 'list' to get PR list, 'open' to open URLs from CSV, 'capture' to generate PDFs/screenshots")
 
@@ -277,12 +309,19 @@ func main() {
 		if *urlsFile == "" {
 			fmt.Println("Usage for capture mode:")
 			fmt.Println("  ./github-pr-tracker -mode capture -urls <csv_file> [-format pdf|png] [-output dir] [-wait seconds] [-fullpage]")
+			fmt.Println("\nNote: For private repos, set the GITHUB_TOKEN environment variable with your GitHub Personal Access Token")
 			flag.PrintDefaults()
 			os.Exit(1)
 		}
 
 		if *captureFormat != "pdf" && *captureFormat != "png" {
 			log.Fatalf("Invalid format: %s. Must be 'pdf' or 'png'", *captureFormat)
+		}
+
+		// Get token from environment variable
+		authToken := os.Getenv("GITHUB_TOKEN")
+		if authToken == "" {
+			fmt.Println("Warning: GITHUB_TOKEN environment variable not set. Private repos may not be accessible.")
 		}
 
 		// Read URLs from CSV
@@ -303,6 +342,7 @@ func main() {
 			OutputDir: *captureOutputDir,
 			WaitTime:  *captureWaitTime,
 			FullPage:  *captureFullPage,
+			AuthToken: authToken,
 		}
 
 		// Skip header row
