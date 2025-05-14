@@ -15,12 +15,8 @@ A Go script to support audit evidence collection, the script can:
 ## Installation
 
 1. Make sure you have the GitHub CLI installed:
-   ```bash
-   # macOS
-   brew install gh
-   
-   # Other platforms: https://github.com/cli/cli#installation
-   ```
+
+For installation instructiosn see https://github.com/cli/cli#installation 
 
 2. Authenticate with GitHub:
    ```bash
@@ -65,10 +61,12 @@ Fetches PRs from GitHub and saves them to a CSV file.
 
 Example:
 ```bash
+
 ./github-pr-tracker -mode list -since 2023-05-01 -repo yfnstn/github-pr-tracker -search "term"
 ```
 
 This will create a CSV file named `merged_prs_yfnstn_github-pr-tracker_20230501_term.csv` containing:
+
 - PR Number
 - Title
 - Merged At
@@ -130,3 +128,5 @@ For private repositories, make sure you have set up your GitHub token in the `.e
 - Generated files are named in the format `repo_pr_#.pdf` or `repo_pr_#.png`
 - The script will create the output directory if it doesn't exist
 - For best results with PDF generation, use a wait time of at least 5-10 seconds 
+- The script will fetch all matching PRs, not just the first 30 results
+- Results are fetched in batches of 10000 to ensure complete data collection 
