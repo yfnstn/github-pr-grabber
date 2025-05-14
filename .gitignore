@@ -1,0 +1,37 @@
+# Environment variables
+.env
+
+# Output directory for captures
+pr_captures/
+
+# Binary and build artifacts
+github-pr-tracker
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go specific
+/vendor/
+*.o
+*.a
+*.prof
+*.trace
+go.work
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# CSV files (optional, uncomment if you don't want to track generated CSV files)
+*.csv 

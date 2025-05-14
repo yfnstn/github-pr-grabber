@@ -2,7 +2,10 @@ module github.com/yfnstn/github-pr-tracker
 
 go 1.23.4
 
-require github.com/playwright-community/playwright-go v0.3900.1
+require (
+	github.com/joho/godotenv v1.5.1
+	github.com/playwright-community/playwright-go v0.3900.1
+)
 
 require (
 	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
