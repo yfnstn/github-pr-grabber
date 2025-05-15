@@ -1,4 +1,4 @@
-# GitHub PR Tracker
+# GitHub PR Grabber
 
 A Go script to support audit evidence collection, the script can: 
 - Track merged pull requests in a GitHub repository 
@@ -48,7 +48,7 @@ A Go script to support audit evidence collection, the script can:
    echo "GITHUB_TOKEN=your_github_token_here" > .env
    ```
    To get a GitHub token:
-   - Go to GitHub.com → Settings → Developer Settings → Personal Access Tokens → Tokens
+   - Go to GitHub.com → Settings → Developer Settings → Personal Access Tokens → Fine-grained-tokens
    - Generate a new token with the `repo` scope (for private repos)
    - Copy the token and paste it in your `.env` file
 
@@ -60,15 +60,15 @@ The script has three modes of operation:
 Fetches PRs from GitHub and saves them to a CSV file.
 
 ```bash
-./github-pr-tracker -mode list -since YYYY-MM-DD -repo owner/repo [-search term]
+./github-pr-grabber -mode list -since YYYY-MM-DD -repo owner/repo [-search term]
 ```
 
 Example:
 ```bash
-./github-pr-tracker -mode list -since 2023-05-01 -repo yfnstn/github-pr-tracker -search "term"
+./github-pr-grabber -mode list -since 2023-05-01 -repo yfnstn/github-pr-grabber -search "term"
 ```
 
-This will create a CSV file named `merged_prs_yfnstn_github-pr-tracker_20230501_term.csv` containing:
+This will create a CSV file named `merged_prs_yfnstn_github-pr-grabber_20230501_term.csv` containing:
 - PR Number
 - Title
 - Merged At
@@ -78,19 +78,19 @@ This will create a CSV file named `merged_prs_yfnstn_github-pr-tracker_20230501_
 Opens PR URLs from a CSV file in your default browser.
 
 ```bash
-./github-pr-tracker -mode open -urls <csv_file>
+./github-pr-grabber -mode open -urls <csv_file>
 ```
 
 Example:
 ```bash
-./github-pr-tracker -mode open -urls merged_prs_yfnstn_github-pr-tracker_20230501_term.csv
+./github-pr-grabber -mode open -urls merged_prs_yfnstn_github-pr-grabber_20230501_term.csv
 ```
 
 ### 3. Capture Mode
 Generates PDFs or screenshots of PR pages from URLs in a CSV file.
 
 ```bash
-./github-pr-tracker -mode capture -urls <csv_file> [-format pdf|png] [-output dir] [-wait seconds] [-fullpage]
+./github-pr-grabber -mode capture -urls <csv_file> [-format pdf|png] [-output dir] [-wait seconds] [-fullpage]
 ```
 
 Options:
@@ -102,17 +102,17 @@ Options:
 Example:
 ```bash
 # Generate PDFs
-./github-pr-tracker -mode capture -urls merged_prs.csv -output ./pr_captures -wait 10
+./github-pr-grabber -mode capture -urls merged_prs.csv -output ./pr_captures -wait 10
 
 # Generate screenshots
-./github-pr-tracker -mode capture -urls merged_prs.csv -format png -output ./pr_captures
+./github-pr-grabber -mode capture -urls merged_prs.csv -format png -output ./pr_captures
 ```
 
 For private repositories, make sure you have set up your GitHub token in the `.env` file as described in the installation section.
 
 ## Features
 
-- Fetch up to 10000 PRs in a single query
+- Fetch up to 10,000 PRs in a single query
 - Filter PRs by date and search term
 - Save PR details to CSV
 - Open PRs in your default browser
