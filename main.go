@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/csv"
 	"flag"
 	"fmt"
 	"log"
@@ -119,14 +118,7 @@ func main() {
 		}
 
 		// Read URLs from CSV
-		file, err := os.Open(*urlsFile)
-		if err != nil {
-			log.Fatalf("Error opening CSV file: %v", err)
-		}
-		defer file.Close()
-
-		reader := csv.NewReader(file)
-		records, err := reader.ReadAll()
+		prURLs, err := ParsePRURLsFromCSV(*urlsFile)
 		if err != nil {
 			log.Fatalf("Error reading CSV file: %v", err)
 		}
@@ -139,15 +131,9 @@ func main() {
 			AuthToken: authToken,
 		}
 
-		// Skip header row
-		for i, record := range records[1:] {
-			if len(record) < 4 {
-				continue
-			}
-			url := record[3]
-
-			fmt.Printf("\nCapturing PR %d/%d: %s\n", i+1, len(records)-1, url)
-			if err := capturePRPage(url, options); err != nil {
+		for i, pr := range prURLs {
+			fmt.Printf("\nCapturing PR %d/%d: %s\n", i+1, len(prURLs), pr.URL)
+			if err := capturePRPage(pr.URL, options); err != nil {
 				fmt.Printf("Error capturing PR: %v\n", err)
 				continue
 			}
