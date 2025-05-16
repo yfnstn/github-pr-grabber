@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -33,7 +34,7 @@ func main() {
 
 	// Capture mode flags
 	captureFormat := flag.String("format", "pdf", "Capture format: 'pdf' or 'png' (for capture mode)")
-	captureOutputDir := flag.String("output", "pr_captures", "Output directory for captures (for capture mode)")
+	captureOutputDir := flag.String("output", "generated/captures", "Output directory for captures (for capture mode)")
 	captureWaitTime := flag.Int("wait", 5, "Seconds to wait for page load (for capture mode)")
 	captureFullPage := flag.Bool("fullpage", true, "Capture full page (for capture mode)")
 
@@ -72,13 +73,18 @@ func main() {
 			os.Exit(0)
 		}
 
-		csvFile := fmt.Sprintf("merged_prs_%s_%s.csv",
+		// Create generated/csv directory if it doesn't exist
+		if err := os.MkdirAll("generated/csv", 0755); err != nil {
+			log.Fatalf("Error creating output directory: %v", err)
+		}
+
+		csvFile := filepath.Join("generated/csv", fmt.Sprintf("merged_prs_%s_%s.csv",
 			strings.Replace(*repo, "/", "_", -1),
-			sinceDate.Format("20060102"))
+			sinceDate.Format("20060102")))
 		if *searchTerm != "" {
-			csvFile = fmt.Sprintf("%s_%s.csv",
-				strings.TrimSuffix(csvFile, ".csv"),
-				strings.Replace(*searchTerm, " ", "_", -1))
+			csvFile = filepath.Join("generated/csv", fmt.Sprintf("%s_%s.csv",
+				strings.TrimSuffix(filepath.Base(csvFile), ".csv"),
+				strings.Replace(*searchTerm, " ", "_", -1)))
 		}
 
 		if err := saveToCSV(prs, csvFile); err != nil {
