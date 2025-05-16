@@ -64,7 +64,7 @@ Example:
 ./github-pr-grabber -mode list -since 2023-05-01 -repo yfnstn/github-pr-grabber -search "term"
 ```
 
-This will create a CSV file named `merged_prs_yfnstn_github-pr-grabber_20230501_term.csv` containing:
+This will create a CSV file in the `generated/csv` directory named `merged_prs_yfnstn_github-pr-grabber_20230501_term.csv` containing:
 - PR Number
 - Title
 - Merged At
@@ -91,17 +91,17 @@ Generates PDFs or screenshots of PR pages from URLs in a CSV file.
 
 Options:
 - `-format`: Output format, either "pdf" (default) or "png"
-- `-output`: Output directory (default: "pr_captures")
+- `-output`: Output directory (default: "generated/captures")
 - `-wait`: Seconds to wait for page load (default: 5)
 - `-fullpage`: Whether to capture the full page (default: true)
 
 Example:
 ```bash
 # Generate PDFs
-./github-pr-grabber -mode capture -urls merged_prs.csv -output ./pr_captures -wait 10
+./github-pr-grabber -mode capture -urls merged_prs.csv -output ./generated/captures -wait 10
 
 # Generate screenshots
-./github-pr-grabber -mode capture -urls merged_prs.csv -format png -output ./pr_captures
+./github-pr-grabber -mode capture -urls merged_prs.csv -format png -output ./generated/captures
 ```
 
 For private repositories, make sure you have set up your GitHub token in the `.env` file as described in the installation section.
@@ -123,8 +123,10 @@ For private repositories, make sure you have set up your GitHub token in the `.e
 - For private repositories, a GitHub Personal Access Token is required (set in `.env`)
 - The search term is optional and will filter PRs by matching the term in their titles or descriptions
 - You can run the script from any directory - it no longer needs to be run from within the target repository
-- Generated files are named in the format `repo_pr_#.pdf` or `repo_pr_#.png`
-- The script will create the output directory if it doesn't exist
+- All generated files are stored in the `generated` directory:
+  - CSV files are stored in `generated/csv/`
+  - Captures (PDFs/PNGs) are stored in `generated/captures/` by default
+- The script will create the output directories if they don't exist
 - For best results with PDF generation, use a wait time of at least 5-10 seconds 
 - The script will fetch all matching PRs, not just the first 30 results
 - Results are fetched in batches of 10000 to ensure complete data collection 

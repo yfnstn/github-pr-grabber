@@ -1,6 +1,11 @@
 # Environment variables
 .env
 
+# Generated files and directories
+generated/
+generated/csv/
+generated/captures/
+
 # Output directory for captures
 pr_captures/
 
