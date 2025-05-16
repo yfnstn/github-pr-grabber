@@ -5,7 +5,7 @@
 pr_captures/
 
 # Binary and build artifacts
-github-pr-tracker
+github-pr-grabber
 *.exe
 *.exe~
 *.dll
