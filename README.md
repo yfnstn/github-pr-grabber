@@ -25,21 +25,6 @@ A Go script to support audit evidence collection, the script can:
    go build
    ```
 
-4. (Optional) Create a `.env` file for GitHub authentication:
-   ```bash
-   # Create .env file
-   echo "GITHUB_TOKEN=your_github_token_here" > .env
-   ```
-   To get a GitHub token:
-   - Go to GitHub.com → Settings → Developer Settings → Personal Access Tokens
-   - You can use either:
-     - Classic tokens (starts with `ghp_`)
-     - Fine-grained tokens (starts with `github_pat_`)
-   - Generate a new token with the appropriate permissions:
-     - For classic tokens: use the `repo` scope
-     - For fine-grained tokens: select the specific repository and grant "Read" access
-   - Copy the token and paste it in your `.env` file
-
 ## Usage
 
 The script has two modes of operation:
@@ -94,4 +79,4 @@ Example:
   - CSV files are stored in `generated/csv/`
 - The script will create the output directories if they don't exist
 - The script will fetch all matching PRs, not just the first 30 results
-- Results are fetched in batches of 10000 to ensure complete data collection
+- Results are fetched in batches of 10,000 to ensure complete data collection
