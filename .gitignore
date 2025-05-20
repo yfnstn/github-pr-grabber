@@ -38,5 +38,5 @@ go.work
 .DS_Store
 Thumbs.db
 
-# CSV files (optional, uncomment if you don't want to track generated CSV files)
+# CSV files
 *.csv 
