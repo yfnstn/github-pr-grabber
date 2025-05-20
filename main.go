@@ -18,11 +18,15 @@ func main() {
 		// Only log if the error is not "file not found"
 		if !strings.Contains(err.Error(), "no such file") {
 			log.Printf("Warning: Error loading .env file: %v", err)
+		} else {
+			log.Printf("No .env file found")
 		}
+	} else {
+		log.Printf(".env file loaded successfully")
 	}
 
 	// Define mode flag
-	mode := flag.String("mode", "", "Operation mode: 'list' to get PR list, 'open' to open URLs from CSV, 'capture' to generate PDFs/screenshots")
+	mode := flag.String("mode", "", "Operation mode: 'list' to get PR list, 'open' to open URLs from CSV")
 
 	// PR list mode flags
 	sinceDateStr := flag.String("since", "", "Start date in YYYY-MM-DD format (for list mode)")
@@ -31,12 +35,6 @@ func main() {
 
 	// Open mode flags
 	urlsFile := flag.String("urls", "", "CSV file containing PR URLs (for open mode)")
-
-	// Capture mode flags
-	captureFormat := flag.String("format", "pdf", "Capture format: 'pdf' or 'png' (for capture mode)")
-	captureOutputDir := flag.String("output", "generated/captures", "Output directory for captures (for capture mode)")
-	captureWaitTime := flag.Int("wait", 5, "Seconds to wait for page load (for capture mode)")
-	captureFullPage := flag.Bool("fullpage", true, "Capture full page (for capture mode)")
 
 	flag.Parse()
 
@@ -104,55 +102,12 @@ func main() {
 			log.Fatalf("Error opening PRs: %v", err)
 		}
 
-	case "capture":
-		if *urlsFile == "" {
-			fmt.Println("Usage for capture mode:")
-			fmt.Println("  ./github-pr-grabber -mode capture -urls <csv_file> [-format pdf|png] [-output dir] [-wait seconds] [-fullpage]")
-			fmt.Println("\nNote: For private repos, set the GITHUB_TOKEN environment variable with your GitHub Personal Access Token")
-			flag.PrintDefaults()
-			os.Exit(1)
-		}
-
-		if *captureFormat != "pdf" && *captureFormat != "png" {
-			log.Fatalf("Invalid format: %s. Must be 'pdf' or 'png'", *captureFormat)
-		}
-
-		// Get token from environment variable
-		authToken := os.Getenv("GITHUB_TOKEN")
-		if authToken == "" {
-			fmt.Println("Warning: GITHUB_TOKEN environment variable not set. Private repos may not be accessible.")
-		}
-
-		// Read URLs from CSV
-		prURLs, err := ParsePRURLsFromCSV(*urlsFile)
-		if err != nil {
-			log.Fatalf("Error reading CSV file: %v", err)
-		}
-
-		options := CaptureOptions{
-			Format:    *captureFormat,
-			OutputDir: *captureOutputDir,
-			WaitTime:  *captureWaitTime,
-			FullPage:  *captureFullPage,
-			AuthToken: authToken,
-		}
-
-		for i, pr := range prURLs {
-			fmt.Printf("\nCapturing PR %d/%d: %s\n", i+1, len(prURLs), pr.URL)
-			if err := capturePRPage(pr.URL, options); err != nil {
-				fmt.Printf("Error capturing PR: %v\n", err)
-				continue
-			}
-		}
-
 	default:
-		fmt.Println("Please specify a mode: 'list', 'open', or 'capture'")
+		fmt.Println("Please specify a mode: 'list' or 'open'")
 		fmt.Println("\nList mode usage:")
 		fmt.Println("  ./github-pr-grabber -mode list -since YYYY-MM-DD -repo owner/repo [-search term]")
 		fmt.Println("\nOpen mode usage:")
 		fmt.Println("  ./github-pr-grabber -mode open -urls <csv_file>")
-		fmt.Println("\nCapture mode usage:")
-		fmt.Println("  ./github-pr-grabber -mode capture -urls <csv_file> [-format pdf|png] [-output dir] [-wait seconds] [-fullpage]")
 		os.Exit(1)
 	}
 }

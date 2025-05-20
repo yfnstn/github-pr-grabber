@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
@@ -51,10 +53,37 @@ func buildGitHubURL(owner, repo, prNumber string) string {
 	return fmt.Sprintf("https://github.com/%s/%s/pull/%s", owner, repo, prNumber)
 }
 
+// detectDelimiter tries to determine if the file uses tabs or commas as delimiters
+func detectDelimiter(file *os.File) (rune, error) {
+	// Read the first line
+	reader := bufio.NewReader(file)
+	firstLine, err := reader.ReadString('\n')
+	if err != nil && err != io.EOF {
+		return 0, fmt.Errorf("error reading first line: %v", err)
+	}
+
+	// Reset file position for subsequent reads
+	if _, err := file.Seek(0, 0); err != nil {
+		return 0, fmt.Errorf("error resetting file position: %v", err)
+	}
+
+	// Count tabs and commas
+	tabCount := strings.Count(firstLine, "\t")
+	commaCount := strings.Count(firstLine, ",")
+
+	// If we have more tabs than commas, use tab as delimiter
+	if tabCount > commaCount {
+		return '\t', nil
+	}
+	// Otherwise use comma (even if counts are equal, comma is more common)
+	return ',', nil
+}
+
 // ParsePRURLsFromCSV reads a CSV file and returns a slice of PR URLs
 // The function detects the CSV format by analyzing headers and can handle:
 // 1. A direct URL column
 // 2. Separate owner, repo, and PR number columns
+// The file can be either tab or comma delimited
 func ParsePRURLsFromCSV(csvFile string) ([]PRURL, error) {
 	file, err := os.Open(csvFile)
 	if err != nil {
@@ -62,7 +91,15 @@ func ParsePRURLsFromCSV(csvFile string) ([]PRURL, error) {
 	}
 	defer file.Close()
 
+	// Detect the delimiter
+	delimiter, err := detectDelimiter(file)
+	if err != nil {
+		return nil, fmt.Errorf("error detecting delimiter: %v", err)
+	}
+
 	reader := csv.NewReader(file)
+	reader.Comma = delimiter
+
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("error reading CSV file: %v", err)

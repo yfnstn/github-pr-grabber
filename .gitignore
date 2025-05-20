@@ -4,10 +4,6 @@
 # Generated files and directories
 generated/
 generated/csv/
-generated/captures/
-
-# Output directory for captures
-pr_captures/
 
 # Binary and build artifacts
 github-pr-grabber
