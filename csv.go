@@ -119,19 +119,17 @@ func ParsePRURLsFromCSV(csvFile string) ([]PRURL, error) {
 
 	var prURLs []PRURL
 	// Process data rows (skip header)
-	for i, record := range records[1:] {
+	for _, record := range records[1:] {
 		var url string
 		if format.URLColumn != -1 {
 			// Use direct URL if available
 			if format.URLColumn >= len(record) {
-				fmt.Printf("Warning: Row %d is missing URL column, skipping\n", i+2)
 				continue
 			}
 			url = strings.TrimSpace(record[format.URLColumn])
 		} else {
 			// Build URL from components
 			if format.OwnerColumn >= len(record) || format.RepoColumn >= len(record) || format.PRNumberColumn >= len(record) {
-				fmt.Printf("Warning: Row %d is missing required columns, skipping\n", i+2)
 				continue
 			}
 			owner := strings.TrimSpace(record[format.OwnerColumn])
@@ -141,7 +139,6 @@ func ParsePRURLsFromCSV(csvFile string) ([]PRURL, error) {
 		}
 
 		if url == "" {
-			fmt.Printf("Warning: Row %d has empty URL, skipping\n", i+2)
 			continue
 		}
 

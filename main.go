@@ -8,23 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Load .env file if it exists
-	if err := godotenv.Load(); err != nil {
-		// Only log if the error is not "file not found"
-		if !strings.Contains(err.Error(), "no such file") {
-			log.Printf("Warning: Error loading .env file: %v", err)
-		} else {
-			log.Printf("No .env file found")
-		}
-	} else {
-		log.Printf(".env file loaded successfully")
-	}
-
 	// Define mode flag
 	mode := flag.String("mode", "", "Operation mode: 'list' to get PR list, 'open' to open URLs from CSV")
 
