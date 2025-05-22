@@ -27,37 +27,99 @@ A Go script to support audit evidence collection, the script can:
 
 ## Usage
 
-The script has two modes of operation:
+The script can be used in two ways: interactive mode or command-line mode.
 
-### 1. List Mode
-Fetches PRs from GitHub and saves them to a CSV file.
+### Interactive Mode
 
+Run the program without any arguments or with the `-i` flag:
+```bash
+./github-pr-grabber
+# or
+./github-pr-grabber -i
+```
+
+You'll be presented with an interactive menu:
+```
+GitHub PR Grabber
+=================
+
+Select a mode:
+1. List Mode - Fetch PRs and save to CSV
+2. Open Mode - Open PRs from CSV in browser
+3. Exit
+```
+
+### Command-Line Mode
+
+Alternatively, you can use command-line flags for automation or scripting:
+
+#### List Mode
 ```bash
 ./github-pr-grabber -mode list -since YYYY-MM-DD -repo owner/repo [-search term]
 ```
 
 Example:
 ```bash
-./github-pr-grabber -mode list -since 2023-05-01 -repo yfnstn/github-pr-grabber -search "term"
+./github-pr-grabber -mode list -since 2023-05-01 -repo yfnstn/github-pr-grabber -search "security"
 ```
 
-This will create a CSV file in the `generated/csv` directory named `merged_prs_yfnstn_github-pr-grabber_20230501_term.csv` containing:
-- PR Number
-- Title
-- Merged At
-- URL (direct link to the PR on GitHub)
-
-### 2. Open Mode
-Opens PR URLs from a CSV file in your default browser.
-
+#### Open Mode
 ```bash
 ./github-pr-grabber -mode open -urls <csv_file>
 ```
 
 Example:
 ```bash
-./github-pr-grabber -mode open -urls merged_prs_yfnstn_github-pr-grabber_20230501_term.csv
+./github-pr-grabber -mode open -urls generated/csv/merged_prs_yfnstn_github-pr-grabber_20230501_security.csv
 ```
+
+### Available Flags
+
+Long form flags:
+- `-mode`: Operation mode ('list' or 'open')
+- `-since`: Start date in YYYY-MM-DD format (for list mode)
+- `-repo`: GitHub repository in owner/repo format (for list mode)
+- `-search`: Optional search term (for list mode)
+- `-urls`: CSV file containing PR URLs (for open mode)
+- `-i`: Run in interactive mode
+
+Shorthand flags:
+- `-m`: Shorthand for -mode
+- `-s`: Shorthand for -since
+- `-r`: Shorthand for -repo
+- `-q`: Shorthand for -search (query)
+- `-u`: Shorthand for -urls
+
+Examples using shorthand flags:
+```bash
+# List mode with shorthand flags
+./github-pr-grabber -m list -s 2023-05-01 -r yfnstn/github-pr-grabber -q security
+
+# Open mode with shorthand flags
+./github-pr-grabber -m open -u generated/csv/merged_prs.csv
+```
+
+### Mode Details
+
+#### 1. List Mode
+Fetches PRs from GitHub and saves them to a CSV file.
+
+In interactive mode, you'll be prompted for:
+- Start date (in YYYY-MM-DD format)
+- Repository (in owner/repo format)
+- Optional search term
+
+The script will create a CSV file in the `generated/csv` directory containing:
+- PR Number
+- Title
+- Merged At
+- URL (direct link to the PR on GitHub)
+
+#### 2. Open Mode
+Opens PR URLs from a CSV file in your default browser.
+
+In interactive mode, you'll be prompted for:
+- Path to the CSV file containing PR URLs
 
 ## Features
 
